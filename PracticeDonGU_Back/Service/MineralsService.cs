@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PracticeDonGU_Back.Contexts;
+using PracticeDonGU_Back.DTOs;
 using PracticeDonGU_Back.Helpers;
 using PracticeDonGU_Back.Models;
 
@@ -21,12 +22,12 @@ namespace PracticeDonGU_Back.Service
 
             var mineral = _context.Minerals.FirstOrDefault(m => m.MineralId == mineralId);
             
-            if (mineral == null)
+            if (mineral != null)
             {
                 result.Success = true;
                 result.Message = "Mineral found";
                 result.Result = new StatusCodeResult(StatusCodes.Status200OK);
-                result.Object = mineral;
+                result.Object = new RestfulMineral(mineral);
             }
             else
             {
@@ -42,11 +43,12 @@ namespace PracticeDonGU_Back.Service
             var result = new ResultObject();
 
             List<Mineral> minerals = _context.Minerals.ToList();
+            List<RestfulMineral> restfulMinals = minerals.Select(m => new RestfulMineral(m)).ToList();
 
             result.Success = true;
             result.Message = "Minerals founded";
             result.Result = new StatusCodeResult(StatusCodes.Status200OK);
-            result.Object = minerals;
+            result.Object = restfulMinals;
 
             return result;
         }
@@ -55,14 +57,14 @@ namespace PracticeDonGU_Back.Service
         {
             var result = new ResultObject();
 
-            var minerals = _context.Minerals.FromSqlRaw("EXEC CREATE_MINERAL @MINERAL_NAME", mineralName).ToList();
+            var minerals = _context.Minerals.FromSqlRaw("EXEC CREATE_MINERAL @p0", mineralName).ToList();
 
             if (minerals.Count > 0)
             {
                 result.Success = true;
                 result.Message = "Mineral created successfully";
                 result.Result = new StatusCodeResult(StatusCodes.Status200OK);
-                result.Object = minerals.First();
+                result.Object = new RestfulMineral(minerals.First());
             }
             else
             {
@@ -77,14 +79,14 @@ namespace PracticeDonGU_Back.Service
         {
             var result = new ResultObject();
 
-            var minerals = _context.Minerals.FromSqlRaw("EXEC UPDATE_MINERAL @MINERAL_ID, @MINERAL_NAME", mineralId, mineralName).ToList();
+            var minerals = _context.Minerals.FromSqlRaw("EXEC UPDATE_MINERAL @p0, @p1", mineralId, mineralName).ToList();
 
             if (minerals.Count > 0)
             {
                 result.Success = true;
                 result.Message = "Mineral updated successfully";
                 result.Result = new StatusCodeResult(StatusCodes.Status200OK);
-                result.Object = minerals.First();
+                result.Object = new RestfulMineral(minerals.First());
             }
             else
             {
@@ -99,7 +101,7 @@ namespace PracticeDonGU_Back.Service
         {
             var result = new ResultObject();
 
-            var rowsAffected = _context.Database.ExecuteSqlRaw("EXEC DELETE_MINERAL @MINERAL_ID", mineralId);
+            var rowsAffected = _context.Database.ExecuteSqlRaw("EXEC DELETE_MINERAL @p0", mineralId);
 
             if (rowsAffected > 0)
             {
