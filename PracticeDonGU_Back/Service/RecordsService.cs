@@ -7,106 +7,106 @@ using PracticeDonGU_Back.Models;
 
 namespace PracticeDonGU_Back.Service
 {
-    public class UnitsService(PracticeDbContext context) : IUnitsService
+    public class RecordsService(PracticeDbContext context) : IRecordsService
     {
         private readonly PracticeDbContext _context = context;
 
-        public ResultObject GetUnit(uint unitId)
+        public ResultObject GetRecord(DateTime recordDate, uint mineralId)
         {
             var result = new ResultObject();
 
-            var unit = _context.Units.FirstOrDefault(u => u.UnitId == unitId);
+            var record = _context.Records.FirstOrDefault(r => r.RecordDate == recordDate && r.MineralId == mineralId);
             
-            if (unit != null)
+            if (record != null)
             {
                 result.Success = true;
-                result.Message = "Unit found";
+                result.Message = "Record found";
                 result.Result = new StatusCodeResult(StatusCodes.Status200OK);
-                result.Object = new RestfulUnit(unit);
+                result.Object = new RestfulRecord(record);
             }
             else
             {
-                result.Message = "Unit not found";
+                result.Message = "Record not found";
                 result.Result = new StatusCodeResult(StatusCodes.Status404NotFound);
             }
 
             return result;
         }
 
-        public ResultObject GetUnits()
+        public ResultObject GetRecords()
         {
             var result = new ResultObject();
 
-            List<Unit> units = _context.Units.ToList();
-            List<RestfulUnit> restfulMinals = units.Select(u => new RestfulUnit(u)).ToList();
+            List<Record> records = _context.Records.ToList();
+            List<RestfulRecord> restfulMinals = records.Select(r => new RestfulRecord(r)).ToList();
 
             result.Success = true;
-            result.Message = "Units founded";
+            result.Message = "Records founded";
             result.Result = new StatusCodeResult(StatusCodes.Status200OK);
             result.Object = restfulMinals;
 
             return result;
         }
 
-        public ResultObject PostUnit(string unitName, float unitValue)
+        public ResultObject PostRecord(DateTime recordDate, uint mineralId, uint? unitId, float recordValue)
         {
             var result = new ResultObject();
 
-            var units = _context.Units.FromSqlRaw("EXEC CREATE_UNIT @p0, @p1", unitName, unitValue).ToList();
+            var records = _context.Records.FromSqlRaw("EXEC CREATE_RECORD @p0, @p1, @p2, @p3", recordDate, mineralId, unitId, recordValue).ToList();
 
-            if (units.Count > 0)
+            if (records.Count > 0)
             {
                 result.Success = true;
-                result.Message = "Unit created successfully";
+                result.Message = "Record created successfully";
                 result.Result = new StatusCodeResult(StatusCodes.Status200OK);
-                result.Object = new RestfulUnit(units.First());
+                result.Object = new RestfulRecord(records.First());
             }
             else
             {
-                result.Message = "Error creating unit";
+                result.Message = "Error creating record";
                 result.Result = new StatusCodeResult(StatusCodes.Status400BadRequest);
             }
 
             return result;
         }
 
-        public ResultObject PutUnit(uint unitId, string unitName, float unitValue)
+        public ResultObject PutRecord(DateTime recordDate, uint mineralId, uint? unitId, float recordValue)
         {
             var result = new ResultObject();
 
-            var units = _context.Units.FromSqlRaw("EXEC UPDATE_UNIT @p0, @p1, @p2", unitId, unitName, unitValue).ToList();
+            var records = _context.Records.FromSqlRaw("EXEC UPDATE_RECORD @p0, @p1, @p2, @p3", recordDate, mineralId, unitId, recordValue).ToList();
 
-            if (units.Count > 0)
+            if (records.Count > 0)
             {
                 result.Success = true;
-                result.Message = "Unit updated successfully";
+                result.Message = "Record updated successfully";
                 result.Result = new StatusCodeResult(StatusCodes.Status200OK);
-                result.Object = new RestfulUnit(units.First());
+                result.Object = new RestfulRecord(records.First());
             }
             else
             {
-                result.Message = "Error update unit";
+                result.Message = "Error update record";
                 result.Result = new StatusCodeResult(StatusCodes.Status404NotFound);
             }
 
             return result;
         }
 
-        public ResultObject DeleteUnit(uint unitId)
+        public ResultObject DeleteRecord(DateTime recordDate, uint mineralId)
         {
             var result = new ResultObject();
 
-            var rowsAffected = _context.Database.ExecuteSqlRaw("EXEC DELETE_UNIT @p0", unitId);
+            var rowsAffected = _context.Database.ExecuteSqlRaw("EXEC DELETE_RECORD @p0, @p1", recordDate, mineralId);
 
             if (rowsAffected > 0)
             {
                 result.Success = true;
-                result.Message = "Unit deleted successfully";
+                result.Message = "Record deleted successfully";
                 result.Result = new StatusCodeResult(StatusCodes.Status200OK);
             }
             else
             {
-                result.Message = "Error deleting unit";
+                result.Message = "Error deleting record";
                 result.Result = new StatusCodeResult(StatusCodes.Status404NotFound);
             }
 
