@@ -9,16 +9,9 @@ namespace PracticeDonGU_Back.Controllers
     [Produces("application/json")]
     [ApiController]
     [Route("api/minerals")]
-    public class MineralsController : Controller
+    public class MineralsController(PracticeDbContext context) : Controller
     {
-        private readonly PracticeDbContext _context;
-        private readonly IMineralsService _mineralsService;
-
-        public MineralsController(PracticeDbContext context)
-        {
-            _context = context;
-            _mineralsService = new MineralsService(context);
-        }
+        private readonly MineralsService _mineralsService = new (context);
 
         // GET api/minerals
         /// <summary>

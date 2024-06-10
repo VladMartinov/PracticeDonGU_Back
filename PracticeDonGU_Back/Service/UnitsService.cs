@@ -7,106 +7,106 @@ using PracticeDonGU_Back.Models;
 
 namespace PracticeDonGU_Back.Service
 {
-    public class MineralsService(PracticeDbContext context) : IMineralsService
+    public class UnitsService(PracticeDbContext context) : IUnitsService
     {
         private readonly PracticeDbContext _context = context;
 
-        public ResultObject GetMineral(uint mineralId)
+        public ResultObject GetUnit(uint unitId)
         {
             var result = new ResultObject();
 
-            var mineral = _context.Minerals.FirstOrDefault(m => m.MineralId == mineralId);
+            var unit = _context.Units.FirstOrDefault(m => m.UnitId == unitId);
             
-            if (mineral != null)
+            if (unit != null)
             {
                 result.Success = true;
-                result.Message = "Mineral found";
+                result.Message = "Unit found";
                 result.Result = new StatusCodeResult(StatusCodes.Status200OK);
-                result.Object = new RestfulMineral(mineral);
+                result.Object = new RestfulUnit(unit);
             }
             else
             {
-                result.Message = "Mineral not found";
+                result.Message = "Unit not found";
                 result.Result = new StatusCodeResult(StatusCodes.Status404NotFound);
             }
 
             return result;
         }
 
-        public ResultObject GetMinerals()
+        public ResultObject GetUnits()
         {
             var result = new ResultObject();
 
-            List<Mineral> minerals = _context.Minerals.ToList();
-            List<RestfulMineral> restfulMinals = minerals.Select(m => new RestfulMineral(m)).ToList();
+            List<Unit> units = _context.Units.ToList();
+            List<RestfulUnit> restfulMinals = units.Select(m => new RestfulUnit(m)).ToList();
 
             result.Success = true;
-            result.Message = "Minerals founded";
+            result.Message = "Units founded";
             result.Result = new StatusCodeResult(StatusCodes.Status200OK);
             result.Object = restfulMinals;
 
             return result;
         }
 
-        public ResultObject PostMineral(string mineralName)
+        public ResultObject PostUnit(string unitName, float unitValue)
         {
             var result = new ResultObject();
 
-            var minerals = _context.Minerals.FromSqlRaw("EXEC CREATE_MINERAL @p0", mineralName).ToList();
+            var units = _context.Units.FromSqlRaw("EXEC CREATE_UNIT @p0, @p1", unitName, unitValue).ToList();
 
-            if (minerals.Count > 0)
+            if (units.Count > 0)
             {
                 result.Success = true;
-                result.Message = "Mineral created successfully";
+                result.Message = "Unit created successfully";
                 result.Result = new StatusCodeResult(StatusCodes.Status200OK);
-                result.Object = new RestfulMineral(minerals.First());
+                result.Object = new RestfulUnit(units.First());
             }
             else
             {
-                result.Message = "Error creating mineral";
+                result.Message = "Error creating unit";
                 result.Result = new StatusCodeResult(StatusCodes.Status400BadRequest);
             }
 
             return result;
         }
 
-        public ResultObject PutMineral(uint mineralId, string mineralName)
+        public ResultObject PutUnit(uint unitId, string unitName, float unitValue)
         {
             var result = new ResultObject();
 
-            var minerals = _context.Minerals.FromSqlRaw("EXEC UPDATE_MINERAL @p0, @p1", mineralId, mineralName).ToList();
+            var units = _context.Units.FromSqlRaw("EXEC UPDATE_UNIT @p0, @p1, @p2", unitId, unitName, unitValue).ToList();
 
-            if (minerals.Count > 0)
+            if (units.Count > 0)
             {
                 result.Success = true;
-                result.Message = "Mineral updated successfully";
+                result.Message = "Unit updated successfully";
                 result.Result = new StatusCodeResult(StatusCodes.Status200OK);
-                result.Object = new RestfulMineral(minerals.First());
+                result.Object = new RestfulUnit(units.First());
             }
             else
             {
-                result.Message = "Error update mineral";
+                result.Message = "Error update unit";
                 result.Result = new StatusCodeResult(StatusCodes.Status404NotFound);
             }
 
             return result;
         }
 
-        public ResultObject DeleteMineral(uint mineralId)
+        public ResultObject DeleteUnit(uint unitId)
         {
             var result = new ResultObject();
 
-            var rowsAffected = _context.Database.ExecuteSqlRaw("EXEC DELETE_MINERAL @p0", mineralId);
+            var rowsAffected = _context.Database.ExecuteSqlRaw("EXEC DELETE_UNIT @p0", unitId);
 
             if (rowsAffected > 0)
             {
                 result.Success = true;
-                result.Message = "Mineral deleted successfully";
+                result.Message = "Unit deleted successfully";
                 result.Result = new StatusCodeResult(StatusCodes.Status200OK);
             }
             else
             {
-                result.Message = "Error deleting mineral";
+                result.Message = "Error deleting unit";
                 result.Result = new StatusCodeResult(StatusCodes.Status404NotFound);
             }
 
