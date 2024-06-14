@@ -14,6 +14,17 @@ services.AddDbContext(configuration);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(options =>
+{
+    // Vue
+    options.AddPolicy("DefaultPolicy", policyBuilder =>
+    {
+        policyBuilder.WithOrigins(builder.Configuration.GetSection("Origin").Value)
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -24,6 +35,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("DefaultPolicy");
 
 app.UseAuthorization();
 
